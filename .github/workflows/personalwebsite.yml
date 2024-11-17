@@ -41,6 +41,10 @@ jobs:
         run: |
           cd personal-web-site
           npm install
+      - name: CDK Bootstrap
+        run: |
+          cd personal-web-site
+          npx cdk bootstrap aws://${{ secrets.AWS_ACCOUNT_ID }}/${{ env.AWS_REGION }}
       - name: CDK Deploy
         run: |
           cd personal-web-site

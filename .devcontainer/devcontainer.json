@@ -1,0 +1,36 @@
+// For format details, see https://aka.ms/devcontainer.json. For config options, see the
+// README at: https://github.com/devcontainers/templates/tree/main/src/typescript-node
+{
+	"name": "AWS Cloud Projects",
+	// Or use a Dockerfile or Docker Compose file. More info: https://containers.dev/guide/dockerfile
+	"image": "mcr.microsoft.com/devcontainers/typescript-node",
+	// Features to add to the dev container. More info: https://containers.dev/features.
+	"features": {
+		"ghcr.io/devcontainers/features/aws-cli:1.1.0": {},
+		"ghcr.io/devcontainers-contrib/features/aws-cdk:2.0.15": {},
+		"ghcr.io/tomharvey/devcontainer-features/aws-sso-util:1": {}
+	},
+	"mounts": [
+		// This one will mount `~/.aws` into the development environment at `/home/vscode/.aws`.
+		// so any AWS configuration you have on your local machine will be available in your
+		// development environment.
+		// This is required if you're using static AWS IAM Keys.
+		// It's useful if you're using AWS SSO, and want to share your AWS config between all of your environments.
+		"source=${localEnv:HOME}${localEnv:USERPROFILE}/.aws/,target=/home/vscode/.aws/,type=bind,consistency=cached"
+	],
+	"customizations": {
+		"vscode": {
+			"extensions": [
+				"streetsidesoftware.code-spell-checker"
+			]
+		}
+	}
+	// Use 'forwardPorts' to make a list of ports inside the container available locally.
+	// "forwardPorts": [],
+	// Use 'postCreateCommand' to run commands after the container is created.
+	// "postCreateCommand": "yarn install",
+	// Configure tool-specific properties.
+	// "customizations": {},
+	// Uncomment to connect as root instead. More info: https://aka.ms/dev-containers-non-root.
+	// "remoteUser": "root"
+}

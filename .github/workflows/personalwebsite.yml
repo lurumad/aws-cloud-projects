@@ -1,0 +1,42 @@
+name: Personal Website CI/CD
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    permissions:
+      id-token: write
+      contents: write
+
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-node@v3
+        with:
+          node-version: "21"
+      - name: Set up AWS CLI
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y awscli
+          aws --version
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-region: ${{ secrets.AWS_REGION }}
+          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
+          role-session-name: GithubActionsSession
+      - name: Install dependencies
+        run: |
+          cd personal-web-site
+          npm install
+      - name: CDK Deploy
+        run: |
+          cd personal-web-site
+          npx cdk deploy --require-approval never
+      - name: Copy assets
+        run: |
+          aws s3 cp personal-web-site/assets s3://${{ secrets.ASSETS_BUCKET_NAME }}/ --recursive

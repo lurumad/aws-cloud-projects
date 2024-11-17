@@ -5,6 +5,10 @@ on:
     branches: [main]
   workflow_dispatch:
 
+env:
+  AWS_REGION: us-east-1
+  ASSETS_BUCKET_NAME: personal-web-site-oacbucket
+
 jobs:
   deploy:
     runs-on: ubuntu-latest
@@ -26,7 +30,7 @@ jobs:
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
-          aws-region: ${{ secrets.AWS_REGION }}
+          aws-region: ${{ env.AWS_REGION }}
           role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
           role-session-name: GithubActionsSession
       - name: Install dependencies
@@ -39,4 +43,4 @@ jobs:
           npx cdk deploy --require-approval never
       - name: Copy assets
         run: |
-          aws s3 cp personal-web-site/assets s3://${{ secrets.ASSETS_BUCKET_NAME }}/ --recursive
+          aws s3 cp personal-web-site/assets s3://${{ env.ASSETS_BUCKET_NAME }}/ --recursive

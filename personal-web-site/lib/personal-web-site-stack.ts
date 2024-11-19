@@ -33,7 +33,9 @@ export class PersonalWebSiteStack extends cdk.Stack {
       {
         defaultBehavior: {
           origin: origins.S3BucketOrigin.withOriginAccessControl(bucket),
-        }
+          viewerProtocolPolicy: cloudfront.ViewerProtocolPolicy.REDIRECT_TO_HTTPS,
+        },
+        defaultRootObject: "index.html",
       }
     );
   }

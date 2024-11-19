@@ -52,8 +52,7 @@ jobs:
 
           EXISTING_CERT_ARN=$(aws acm list-certificates \
               --query "CertificateSummaryList[?DomainName=='*.luisruizpavon.com'].CertificateArn" \
-              --output text \
-              --profile lurumad)
+              --output text)
 
           if [ -z "$EXISTING_CERT_ARN" ]; then
             echo "Importing certificate..."

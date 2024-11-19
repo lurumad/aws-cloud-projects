@@ -46,9 +46,12 @@ jobs:
           cd personal-web-site
           npx cdk bootstrap aws://${{ secrets.AWS_ACCOUNT_ID }}/${{ env.AWS_REGION }}
       - name: Import Certificate
+        env:
+          PRIVATE_KEY: ${{ secrets.PRIVATE_KEY }}
+          CERTIFICATE: ${{ secrets.CERTIFICATE }}
         run: |
-          echo ${{ secrets.PRIVATE_KEY }} > private-key.key
-          echo ${{ secrets.CERTIFICATE }} > certificate.cer
+          echo $PRIVATE_KEY > private-key.key
+          echo $CERTIFICATE > certificate.cer
 
           EXISTING_CERT_ARN=$(aws acm list-certificates \
               --query "CertificateSummaryList[?DomainName=='*.luisruizpavon.com'].CertificateArn" \

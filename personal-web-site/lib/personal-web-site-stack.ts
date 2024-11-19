@@ -29,7 +29,7 @@ export class PersonalWebSiteStack extends cdk.Stack {
       autoDeleteObjects: true, // NOT recommended for production code
     });
 
-    const certificateArn = ssm.StringParameter.valueForStringParameter(this, '/web/CertificateArn');
+    const certificateArn = ssm.StringParameter.valueForStringParameter(this, '/web/certificateArn');
     const certificate = acm.Certificate.fromCertificateArn(this, 'PersonalWebSiteCertificate', certificateArn)
 
     new cloudfront.Distribution(

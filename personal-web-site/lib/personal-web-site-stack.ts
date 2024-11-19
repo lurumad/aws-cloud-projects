@@ -1,5 +1,7 @@
 import * as cdk from "aws-cdk-lib";
 import * as s3 from "aws-cdk-lib/aws-s3";
+import * as acm from "aws-cdk-lib/aws-certificatemanager";
+import * as ssm from "aws-cdk-lib/aws-ssm";
 import * as cloudfront from "aws-cdk-lib/aws-cloudfront";
 import * as origins from "aws-cdk-lib/aws-cloudfront-origins";
 import { Construct } from "constructs";
@@ -27,6 +29,9 @@ export class PersonalWebSiteStack extends cdk.Stack {
       autoDeleteObjects: true, // NOT recommended for production code
     });
 
+    const certificateArn = ssm.StringParameter.valueForStringParameter(this, '/web/CertificateArn');
+    const certificate = acm.Certificate.fromCertificateArn(this, 'PersonalWebSiteCertificate', certificateArn)
+
     new cloudfront.Distribution(
       this,
       "PersonalWebSiteDistribution",
@@ -36,6 +41,8 @@ export class PersonalWebSiteStack extends cdk.Stack {
           viewerProtocolPolicy: cloudfront.ViewerProtocolPolicy.REDIRECT_TO_HTTPS,
         },
         defaultRootObject: "index.html",
+        domainNames: ["www.luisruizpavon.com"],
+        certificate
       }
     );
   }

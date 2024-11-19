@@ -1,14 +1,20 @@
-# Welcome to your CDK TypeScript project
+# Personal Static Web Site with AWS CDK (TypeScript)
 
-This is a blank project for CDK development with TypeScript.
+Welcome to the **Personal Static Web Site** project! This project leverages the **AWS Cloud Development Kit (CDK)** with **TypeScript** to define and provision cloud infrastructure using code. It demonstrates real-world examples for deploying a personal static web site using AWS services.
 
-The `cdk.json` file tells the CDK Toolkit how to execute your app.
+---
 
-## Useful commands
+## Requirements
 
-- `npm run build` compile typescript to js
-- `npm run watch` watch for changes and compile
-- `npm run test` perform the jest unit tests
-- `npx cdk deploy` deploy this stack to your default AWS account/region
-- `npx cdk diff` compare deployed stack with current state
-- `npx cdk synth` emits the synthesized CloudFormation template
+- Good user experience: fast loading, no downtime.
+- Easy to change: easy to update content.
+
+---
+
+## Architecture
+
+The personal web site is hosted on **Amazon S3** with **CloudFront** for content delivery. The site is deployed using **GitHub Actions**.
+
+- Amazon S3: Is a highly scalable, reliable, and low-latency data storage infrastructure.
+- CloudFront: Is a fast content delivery network (CDN) service that securely delivers data, videos, applications, and APIs to customers globally.
+- GitHub Actions: Is a CI/CD service that makes it easy to automate all your software workflows.

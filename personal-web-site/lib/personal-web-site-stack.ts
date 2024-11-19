@@ -41,7 +41,7 @@ export class PersonalWebSiteStack extends cdk.Stack {
           viewerProtocolPolicy: cloudfront.ViewerProtocolPolicy.REDIRECT_TO_HTTPS,
         },
         defaultRootObject: "index.html",
-        domainNames: ["www.luisruizpavon.com"],
+        domainNames: ["website.luisruizpavon.com"],
         certificate
       }
     );

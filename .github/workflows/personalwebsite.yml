@@ -50,8 +50,10 @@ jobs:
           PRIVATE_KEY: ${{ secrets.PRIVATE_KEY }}
           CERTIFICATE: ${{ secrets.CERTIFICATE }}
         run: |
-          echo $PRIVATE_KEY > /tmp/private-key.key
-          echo $CERTIFICATE > /tmp/certificate.cer
+          echo "$PRIVATE_KEY" > private_key.key
+          echo "$CERTIFICATE" > certificate.cer
+
+          ls -l
 
           EXISTING_CERT_ARN=$(aws acm list-certificates \
               --query "CertificateSummaryList[?DomainName=='*.luisruizpavon.com'].CertificateArn" \
@@ -61,8 +63,8 @@ jobs:
             echo "Importing certificate..."
             
             CERTIFICATE_ARN=$(aws acm import-certificate \
-                --certificate fileb://tmp/certificate.cer \
-                --private-key fileb://tmp/private_key.key \
+                --certificate fileb://certificate.cer \
+                --private-key fileb://private_key.key \
                 --query "CertificateArn" \
                 --output text)
 
@@ -70,6 +72,8 @@ jobs:
                 --name "/web/certificateArn" \
                 --value "$CERTIFICATE_ARN" \
                 --type String
+
+            rm -f private_key.key certificate.cer
 
             echo "Certificate imported and stored in SSM Parameter Store."
           fi

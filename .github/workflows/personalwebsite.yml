@@ -132,7 +132,7 @@ jobs:
       - name: CDK Destroy
         run: |
           cd personal-web-site
-          npx cdk destroy PersonalWebSiteStack --require-approval never
+          npx cdk destroy PersonalWebSiteStack --require-approval never --force
       - name: Remove certificates
         run: |
           CERTIFICATE_ARN=$(aws ssm get-parameter \

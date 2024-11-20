@@ -49,9 +49,11 @@ jobs:
         env:
           PRIVATE_KEY: ${{ secrets.PRIVATE_KEY }}
           CERTIFICATE: ${{ secrets.CERTIFICATE }}
+          CHAIN: ${{ secrets.CHAIN }}
         run: |
           echo "$PRIVATE_KEY" > private_key.key
           echo "$CERTIFICATE" > certificate.cer
+          echo "$CHAIN" > chain.cer
 
           EXISTING_CERT_ARN=$(aws acm list-certificates \
               --query "CertificateSummaryList[?DomainName=='*.luisruizpavon.com'].CertificateArn" \
@@ -63,6 +65,7 @@ jobs:
             CERTIFICATE_ARN=$(aws acm import-certificate \
                 --certificate fileb://certificate.cer \
                 --private-key fileb://private_key.key \
+                --certificate-chain fileb://chain.cer \
                 --query "CertificateArn" \
                 --output text)
 

@@ -2,14 +2,14 @@
 
 EXISTING_CERT_ARN=$(aws acm list-certificates \
     --query "CertificateSummaryList[?DomainName=='*.luisruizpavon.com'].CertificateArn" \
-    --output text \
-    --profile lurumad)
+    --output text)
 
 if [ -z "$EXISTING_CERT_ARN" ]; then
   echo "Importing certificate..."
   CERTIFICATE_ARN=$(aws acm import-certificate \
       --certificate fileb://certificate.cer \
       --private-key fileb://private_key.key \
+      --certificate-chain fileb://certificate_chain.ca-bundle \
       --query "CertificateArn" \
       --output text)
 

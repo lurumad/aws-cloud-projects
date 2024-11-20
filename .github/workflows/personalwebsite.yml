@@ -1,9 +1,16 @@
 name: Personal Website CI/CD
 
 on:
-  push:
-    branches: [main]
   workflow_dispatch:
+    inputs:
+      job_to_run:
+        description: "Job to run"
+        required: true
+        default: "deploy"
+        type: choice
+        options:
+          - deploy
+          - destroy
 
 env:
   AWS_REGION: us-east-1
@@ -11,6 +18,7 @@ env:
 
 jobs:
   deploy:
+    if: ${{ inputs.job_to_run == 'deploy' }}
     runs-on: ubuntu-latest
 
     permissions:
@@ -45,22 +53,21 @@ jobs:
         run: |
           cd personal-web-site
           npx cdk bootstrap aws://${{ secrets.AWS_ACCOUNT_ID }}/${{ env.AWS_REGION }}
-      - name: Import Certificate
+      - name: Import Certificates
         env:
           PRIVATE_KEY: ${{ secrets.PRIVATE_KEY }}
           CERTIFICATE: ${{ secrets.CERTIFICATE }}
           CHAIN: ${{ secrets.CHAIN }}
         run: |
-          echo "$PRIVATE_KEY" > private_key.key
-          echo "$CERTIFICATE" > certificate.cer
-          echo "$CHAIN" > chain.cer
-
           EXISTING_CERT_ARN=$(aws acm list-certificates \
               --query "CertificateSummaryList[?DomainName=='*.luisruizpavon.com'].CertificateArn" \
               --output text)
 
           if [ -z "$EXISTING_CERT_ARN" ]; then
             echo "Importing certificate..."
+            echo "$PRIVATE_KEY" > private_key.key
+            echo "$CERTIFICATE" > certificate.cer
+            echo "$CHAIN" > chain.cer
             
             CERTIFICATE_ARN=$(aws acm import-certificate \
                 --certificate fileb://certificate.cer \
@@ -74,7 +81,7 @@ jobs:
                 --value "$CERTIFICATE_ARN" \
                 --type String
 
-            rm -f private_key.key certificate.cer
+            rm -f private_key.key certificate.cer chain.cer
 
             echo "Certificate imported and stored in SSM Parameter Store."
           fi
@@ -85,3 +92,60 @@ jobs:
       - name: Copy assets
         run: |
           aws s3 cp personal-web-site/assets s3://${{ env.ASSETS_BUCKET_NAME }}/ --recursive
+
+  destroy:
+    if: ${{ inputs.job_to_run == 'destroy' }}
+    runs-on: ubuntu-latest
+
+    permissions:
+      id-token: write
+      contents: write
+
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-node@v3
+        with:
+          node-version: "20.0.0"
+      - name: Set up AWS CLI
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y awscli
+          aws --version
+      - name: Install AWS CDK
+        run: |
+          npm install -g aws-cdk
+          cdk --version
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-region: ${{ env.AWS_REGION }}
+          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
+          role-session-name: GithubActionsSession
+      - name: Install dependencies
+        run: |
+          cd personal-web-site
+          npm install
+      - name: CDK Bootstrap
+        run: |
+          cd personal-web-site
+          npx cdk bootstrap aws://${{ secrets.AWS_ACCOUNT_ID }}/${{ env.AWS_REGION }}
+      - name: CDK Destroy
+        run: |
+          cd personal-web-site
+          npx cdk destroy PersonalWebSiteStack --require-approval never
+      - name: Remove certificates
+        run: |
+          CERTIFICATE_ARN=$(aws ssm get-parameter \
+              --name "/web/certificateArn" \
+              --query "Parameter.Value" \
+              --output text)
+
+          if [ -n "$CERTIFICATE_ARN" ]; then
+            aws acm delete-certificate \
+                --certificate-arn "$CERTIFICATE_ARN"
+
+            aws ssm delete-parameter \
+                --name "/web/certificateArn"
+
+            echo "Certificate removed."
+          fi

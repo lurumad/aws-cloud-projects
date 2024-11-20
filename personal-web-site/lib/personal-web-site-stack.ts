@@ -29,6 +29,20 @@ export class PersonalWebSiteStack extends cdk.Stack {
       autoDeleteObjects: true, // NOT recommended for production code
     });
 
+    const logBucket = new s3.Bucket(this, "PersonalWebSiteLogBucket", {
+      bucketName: "personal-web-site-logbucket",
+      publicReadAccess: false,
+      accessControl: s3.BucketAccessControl.PRIVATE,
+      blockPublicAccess: s3.BlockPublicAccess.BLOCK_ALL,
+      /**
+       * The default removal policy is RETAIN, which means that cdk destroy will not attempt to delete
+       * the new bucket, and it will remain in your account until manually deleted. By setting the policy to
+       * DESTROY, cdk destroy will attempt to delete the bucket, but will error if the bucket is not empty.
+       */
+      removalPolicy: cdk.RemovalPolicy.DESTROY,
+      autoDeleteObjects: true, // NOT recommended for production code
+    });
+
     const certificateArn = ssm.StringParameter.valueForStringParameter(this, '/web/certificateArn');
     const certificate = acm.Certificate.fromCertificateArn(this, 'PersonalWebSiteCertificate', certificateArn)
 
@@ -42,7 +56,9 @@ export class PersonalWebSiteStack extends cdk.Stack {
         },
         defaultRootObject: "index.html",
         domainNames: ["website.luisruizpavon.com"],
-        certificate
+        certificate,
+        enableLogging: true,
+        logBucket
       }
     );
   }
